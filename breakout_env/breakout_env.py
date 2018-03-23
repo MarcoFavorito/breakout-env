@@ -14,11 +14,13 @@ default_conf = {
   'ball_size': [5, 2],
   'paddle_width': 15,
   'paddle_color': 143,
-  'paddle_speed': 3,
+  'paddle_speed': 2,
   'bricks_rows': 6,
   'bricks_color': [200, 180, 160, 140, 120, 100],
   'bricks_reward': [6, 5, 4, 3, 2, 1],
-  'catch_reward': 0
+  'catch_reward': 0,
+  #   possible values: {"screen", "number", "vector"}
+  'observation': "screen",
 }
 
 # Collision detection
@@ -111,9 +113,9 @@ class Breakout(object):
 
     act = self.actions_meaning[action]
 
-    if act == 'RIGHT' and self.paddle.boundingbox[3] + self.paddle_v[1] < FRAME_X[1]:
+    if act == 'RIGHT' and self.paddle.boundingbox[3] + self.paddle_v[1] < FRAME_X[1]+8:
       self.paddle.translate(self.paddle_v)
-    if act == 'LEFT' and self.paddle.boundingbox[2] - self.paddle_v[1] > FRAME_X[0]:
+    if act == 'LEFT' and self.paddle.boundingbox[2] - self.paddle_v[1] > FRAME_X[0]-8:
       self.paddle.translate([-x for x in self.paddle_v])
 
     if self.started:
@@ -134,7 +136,32 @@ class Breakout(object):
       self.terminal = True
 
     # (obs, reward, done, info)
-    return self.render(), self.reward, self.terminal, None
+    obs_type = self.conf["observation"]
+    obs = self.render()        if obs_type=="screen" else \
+          self.encode_number() if obs_type=="number" else \
+          self.encode_vector() if obs_type=="vector" else \
+          self.render()
+    return obs, self.reward, self.terminal, None
+
+
+  def encode_number(self):
+      """encode the state as a number"""
+      i = self.paddle.pos[1]
+      i *= 144
+      i += self.ball.pos[0]
+      i *= 195
+      i += self.ball.pos[1]
+      i *= 144
+      i += self.ball_v[0]
+      i *= 2
+      i += self.ball_v[1]
+      i *= 2
+      return i
+
+  def encode_vector(self):
+    # paddle_x, ball_y, ball_x, ball_speed_y, ball_speed_x
+    return np.asarray([self.paddle.pos[1], self.ball.pos[0], self.ball.pos[1], self.ball_v[0], self.ball_v[1]])
+
 
   def render(self):
     obs = np.copy(self.obs_base)
@@ -200,13 +227,12 @@ class Breakout(object):
     bb1 = self.ball.boundingbox
     if aabb(bb1, self.paddle.boundingbox):
       vy, vx = self.ball_v
-      print(self.ball_v)
+      # print(self.ball_v)
       bigger, smaller = (vx, vy) if abs(vx) > abs(vy) else (vy, vx)
       bigger, smaller = abs(bigger), abs(smaller)
 
-      # speed = math.sqrt(vx**2 + vy ** 2)
       pos_x = (self.ball.pos[1] - (self.paddle.pos[1] + self.paddle.size[1]/2))/(self.paddle.size[1]/2)
-      print(pos_x, self.ball.pos[1], self.paddle.pos[1] + self.paddle.size[1]/2, self.ball.pos[1] - self.paddle.pos[1] + self.paddle.size[1]/2)
+      # print(pos_x, self.ball.pos[1], self.paddle.pos[1] + self.paddle.size[1]/2, self.ball.pos[1] - self.paddle.pos[1] + self.paddle.size[1]/2)
       vx_sign = 1 if vx > 0 else -1
       # pos_x = -vx_sign if pos_x < -vx_sign*0.3 else vx_sign
       pos_x *=vx_sign
@@ -218,11 +244,8 @@ class Breakout(object):
       print(vx, vy)
       vx = vx_sign*vx
 
-      # vx = vx * pos_x
-      # vy = vy
-      self.ball_v = [-vy, vx]
-      print(self.ball_v)
       # self.ball_v = [-self.ball_v[0], self.ball_v[1]]
+      self.ball_v = [-vy, vx]
 
       self.ball.translate([2 * self.ball_v[0], self.ball_v[1]])
       # Re-new bricks if all clear
