@@ -1,5 +1,6 @@
 import os
 import numpy as np
+import math
 
 FRAME_X = [7, 152]
 FRAME_Y = [31, 194]
@@ -42,6 +43,10 @@ class GameObject(object):
   @property
   def boundingbox(self):
     # BB = (y1, y2, x1, x2)
+    # 0 ------ 1
+    # |        |
+    # |        |
+    # 2 ------ 3
     return [self.pos[0], self.pos[0] + self.size[0], self.pos[1], self.pos[1] + self.size[1]]
 
   @property
@@ -194,9 +199,32 @@ class Breakout(object):
   def __paddle_collision(self):
     bb1 = self.ball.boundingbox
     if aabb(bb1, self.paddle.boundingbox):
-      self.ball_v = [-self.ball_v[0], self.ball_v[1]]
-      self.ball.translate([2*self.ball_v[0], 0])
+      vy, vx = self.ball_v
+      print(self.ball_v)
+      bigger, smaller = (vx, vy) if abs(vx) > abs(vy) else (vy, vx)
+      bigger, smaller = abs(bigger), abs(smaller)
 
+      # speed = math.sqrt(vx**2 + vy ** 2)
+      pos_x = (self.ball.pos[1] - (self.paddle.pos[1] + self.paddle.size[1]/2))/(self.paddle.size[1]/2)
+      print(pos_x, self.ball.pos[1], self.paddle.pos[1] + self.paddle.size[1]/2, self.ball.pos[1] - self.paddle.pos[1] + self.paddle.size[1]/2)
+      vx_sign = 1 if vx > 0 else -1
+      # pos_x = -vx_sign if pos_x < -vx_sign*0.3 else vx_sign
+      pos_x *=vx_sign
+      vx, vy = (-bigger, smaller) if pos_x >= -1.0  and pos_x < -0.75 else \
+               (-smaller, bigger) if pos_x >= -0.75 and pos_x < -0.25 else  \
+               (vx_sign*vx, vy)   if pos_x >= -0.25 and pos_x <  0.25 else \
+               (smaller, bigger)  if pos_x >=  0.25 and pos_x <  0.75 else \
+               (bigger, smaller)
+      print(vx, vy)
+      vx = vx_sign*vx
+
+      # vx = vx * pos_x
+      # vy = vy
+      self.ball_v = [-vy, vx]
+      print(self.ball_v)
+      # self.ball_v = [-self.ball_v[0], self.ball_v[1]]
+
+      self.ball.translate([2 * self.ball_v[0], self.ball_v[1]])
       # Re-new bricks if all clear
       if len(self.bricks.bricks) == 0:
         self.bricks = Bricks(self.conf['bricks_rows'], 18, [6, 8], self.conf['bricks_color'], self.conf['bricks_reward'])
@@ -226,6 +254,7 @@ class Breakout(object):
       if (x1 < bb2[2] and x2 > bb2[2]) or (x1 > bb2[3] and x2 < bb2[3]):
         self.ball_v = [self.ball_v[0], -self.ball_v[1]]
         self.ball.translate([0, 2*self.ball_v[1]])
+        # continue
       else:
         self.ball_v = [-self.ball_v[0], self.ball_v[1]]
         self.ball.translate([2*self.ball_v[0], 0])
