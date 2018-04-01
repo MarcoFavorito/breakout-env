@@ -1,12 +1,22 @@
-import os
 import numpy as np
+from gym.spaces import Box, Discrete
 
-from breakout_env.BreakoutState import BreakoutState
-from breakout_env.utils import GameObject, Bricks, aabb, default_conf, FRAME_X, FRAME_Y, actions_meaning
+from breakout_env.misc.BreakoutState import BreakoutState
+from breakout_env.utils import default_conf, actions_meaning
 import copy
+import gym
 
-class Breakout(object):
 
+class Breakout(gym.Env):
+  """A Breakout gym-compliant environment"""
+
+  metadata = {'render.modes': ['human', 'rgb_array']}
+  reward_range = (-10, np.inf)
+  spec = None
+
+  # Set these in ALL subclasses
+  action_space = Discrete(2)
+  observation_space = Box(low=0, high=255, shape=(210, 160), dtype=np.uint8)
 
   def __init__(self, config={}):
     self.conf = default_conf.copy()
@@ -17,7 +27,7 @@ class Breakout(object):
 
     self.state = BreakoutState(self.conf)
 
-  def render(self):
+  def render(self, mode=None):
     return self.state.encode_pixels()
 
 
@@ -34,15 +44,7 @@ class Breakout(object):
     cur_encode = self.state.encode()
     self.state = self.state._next_state(action)
     reward = self.state.reward
-
-    # while(self.state.encode() == cur_encode):
-    #   print(cur_encode)
-    #   self.state = self.state._next_state(action)
-    #   reward += self.state.reward
-
-    # (obs, reward, done, info)
-    # obs_type = self.conf["observation"]
-    obs = self.state.encode()
+    obs = self.state.encode_pixels()
 
     return obs, reward, self.state.terminal, None
 
@@ -54,5 +56,13 @@ class Breakout(object):
     del next_state
     return n
 
+
+    # while(self.state.encode() == cur_encode):
+    #   print(cur_encode)
+    #   self.state = self.state._next_state(action)
+    #   reward += self.state.reward
+
+    # (obs, reward, done, info)
+    # obs_type = self.conf["observation"]
 
 

@@ -1,9 +1,7 @@
-import random
-
 from breakout_env.utils import GameObject, Bricks, FRAME_X, aabb, FRAME_Y, actions_meaning, obs_base, render_bb, digits, \
     BRICKS_COLS, BRICKS_SIZE
 import numpy as np
-import copy
+
 
 class BreakoutState(object):
 
@@ -27,6 +25,7 @@ class BreakoutState(object):
         self.paddle_v = [0, self.conf['paddle_speed']]
         self.bricks = Bricks(self.conf['bricks_rows'], BRICKS_COLS, BRICKS_SIZE, self.conf['bricks_color'],
                              self.conf['bricks_reward'])
+
 
     def _get_random_ball(self):
 
@@ -104,7 +103,7 @@ class BreakoutState(object):
 
             self.ball.translate([2 * self.ball_v[0], self.ball_v[1]])
             # Re-new bricks if all clear
-            if len(self.bricks.bricks) == 0:
+            if len(self.bricks.deleted_indexes) == len(self.bricks.bricks) == 0:
                 self.bricks = Bricks(self.conf['bricks_rows'], BRICKS_COLS, BRICKS_SIZE, self.conf['bricks_color'],
                                      self.conf['bricks_reward'])
 
@@ -125,6 +124,8 @@ class BreakoutState(object):
         # y1 = y2 - self.ball_v[0]
 
         for idx, brick in enumerate(self.bricks.bricks):
+            if idx in self.bricks.deleted_indexes:
+                continue
             bb2 = brick.boundingbox
 
             if not aabb(bb1, bb2):
@@ -139,7 +140,9 @@ class BreakoutState(object):
                 self.ball.translate([2 * self.ball_v[0], 0])
 
             r = brick.reward
-            del self.bricks.bricks[idx]
+            # del self.bricks.bricks[idx]
+            self.bricks.deleted_indexes.append(idx)
+            self.bricks.bricks_status_matrix[idx//BRICKS_COLS, idx % BRICKS_COLS] = 0
             return r
 
         return 0
@@ -220,7 +223,9 @@ class BreakoutState(object):
         obs[paddle_bb[0]:paddle_bb[1], paddle_bb[2]:paddle_bb[3]] = self.paddle.color
 
         # Draw bricks
-        for brick in self.bricks.bricks:
+        for idx, brick in enumerate(self.bricks.bricks):
+            if idx in self.bricks.deleted_indexes:
+                continue
             bb = brick.boundingbox
             obs[bb[0]:bb[1], bb[2]:bb[3]] = brick.color
 

@@ -77,6 +77,8 @@ class Bricks(object):
         self.brick_colors = list(brick_colors)
         self.brick_rewards = list(brick_rewards)
         self.bricks = []
+        self.deleted_indexes = []
+        self.bricks_status_matrix = np.ones((rows, cols))
 
         for r in range(self.rows):
             y = self.bricks_pos[0] + r * self.brick_size[0]
