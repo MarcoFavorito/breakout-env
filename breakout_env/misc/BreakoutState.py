@@ -102,12 +102,13 @@ class BreakoutState(object):
             self.ball_v = [-vy, vx]
 
             self.ball.translate([2 * self.ball_v[0], self.ball_v[1]])
-            # Re-new bricks if all clear
-            if len(self.bricks.deleted_indexes) == len(self.bricks.bricks) == 0:
-                self.bricks = Bricks(self.conf['bricks_rows'], BRICKS_COLS, BRICKS_SIZE, self.conf['bricks_color'],
+
+        # Re-new bricks if all clear
+        if len(self.bricks.deleted_indexes) == len(self.bricks.bricks):
+            self.terminal = True
+            self.bricks = Bricks(self.conf['bricks_rows'], BRICKS_COLS, BRICKS_SIZE, self.conf['bricks_color'],
                                      self.conf['bricks_reward'])
 
-            return self.paddle.reward
         return 0
 
     def _bricks_collision(self):
@@ -273,5 +274,6 @@ class BreakoutState(object):
 
         if self.lifes < previous_lives:
             self.reward = -10
+            # self.reward = 0
         return self
 

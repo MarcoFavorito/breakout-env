@@ -2,7 +2,7 @@ from gym import RewardWrapper
 import numpy as np
 import copy
 
-class RewardAutomataWrapper(RewardWrapper):
+class RewardLRWrapper(RewardWrapper):
 
     state = 0
     last_status = None
@@ -11,7 +11,7 @@ class RewardAutomataWrapper(RewardWrapper):
         e = self.env.unwrapped
 
         if e.state.lifes ==0:
-            return -5
+            return 0
 
         matrix = e.state.bricks.bricks_status_matrix
         if self.last_status is None:
@@ -40,3 +40,4 @@ class RewardAutomataWrapper(RewardWrapper):
 
 
         return reward
+
