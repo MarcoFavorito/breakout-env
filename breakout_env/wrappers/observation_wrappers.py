@@ -11,6 +11,12 @@ class BreakoutVectorStateWrapper(ObservationWrapper):
     def observation(self, observation):
         return self.env.unwrapped.state.encode_vector()
 
+class BreakoutFullObservableStateWrapper(ObservationWrapper):
+    def observation(self, observation):
+        return self.env.unwrapped.state
+
+
+
 def ToDiscreteObs(conf={}):
     return BreakoutDiscreteStateWrapper(Breakout(conf))
 
