@@ -46,7 +46,8 @@ class Breakout(gym.Env):
     reward = self.state.reward
     obs = self.state.encode_pixels()
 
-    return obs, reward, self.state.terminal, None
+    info = {"goal": self.state.terminal and len(self.state.bricks.deleted_indexes) == len(self.state.bricks.bricks)}
+    return obs, reward, self.state.terminal, info
 
   def get_next_state(self, action):
     current_state = copy.deepcopy(self.state)
