@@ -263,10 +263,6 @@ class BreakoutState(object):
             self.reward += self._bricks_collision()
             self.score += self.reward
 
-            if len(self.bricks.deleted_indexes) == len(self.bricks.bricks):
-                # end of the game! all bricks deleted
-                self.terminal = True
-
         # Check is FIRE
         if actions_meaning[action] == 'FIRE':
             self.started = True
@@ -280,3 +276,8 @@ class BreakoutState(object):
             # self.reward = 0
         return self
 
+    def is_goal(self):
+        if len(self.bricks.deleted_indexes) == len(self.bricks.bricks):
+            self.terminal = True
+            return True
+        return False

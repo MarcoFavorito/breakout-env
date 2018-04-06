@@ -45,8 +45,8 @@ class Breakout(gym.Env):
     self.state = self.state._next_state(action)
     reward = self.state.reward
     obs = self.state.encode_pixels()
+    info = {"goal": self.state.is_goal()}
 
-    info = {"goal": len(self.state.bricks.deleted_indexes) == len(self.state.bricks.bricks)}
     return obs, reward, self.state.terminal, info
 
   def get_next_state(self, action):
