@@ -46,8 +46,6 @@ class Breakout(gym.Env):
     reward = self.state.reward
     obs = self.state.encode_pixels()
 
-    if len(self.state.bricks.deleted_indexes) == len(self.state.bricks.bricks):
-      print("Goal")
     info = {"goal": len(self.state.bricks.deleted_indexes) == len(self.state.bricks.bricks)}
     return obs, reward, self.state.terminal, info
 
