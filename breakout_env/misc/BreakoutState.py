@@ -105,7 +105,6 @@ class BreakoutState(object):
 
         # Re-new bricks if all clear
         if len(self.bricks.deleted_indexes) == len(self.bricks.bricks):
-            self.terminal = True
             self.bricks = Bricks(self.conf['bricks_rows'], BRICKS_COLS, BRICKS_SIZE, self.conf['bricks_color'],
                                      self.conf['bricks_reward'])
 
@@ -263,6 +262,10 @@ class BreakoutState(object):
             self.reward = self._paddle_collision()
             self.reward += self._bricks_collision()
             self.score += self.reward
+
+            if len(self.bricks.deleted_indexes) == len(self.bricks.bricks):
+                # end of the game! all bricks deleted
+                self.terminal = True
 
         # Check is FIRE
         if actions_meaning[action] == 'FIRE':
