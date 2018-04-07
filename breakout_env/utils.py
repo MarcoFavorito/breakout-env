@@ -23,7 +23,8 @@ default_conf = {
   'observation': "pixels",
 }
 
-actions_meaning = ['NOOP', 'FIRE', 'RIGHT', 'LEFT']
+# actions_meaning = ['NOOP', 'FIRE', 'RIGHT', 'LEFT']
+actions_meaning = ['RIGHT', 'LEFT']
 
 obs_base = np.load(os.path.join(os.path.dirname(__file__), 'assets', 'base.npy'))
 digits = [np.load(os.path.join(os.path.dirname(__file__), 'assets', '{}.npy'.format(i))) for i in range(10)]

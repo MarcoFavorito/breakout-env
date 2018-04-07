@@ -213,7 +213,10 @@ class BreakoutState(object):
 
     def encode_vector(self):
         # paddle_x, ball_y, ball_x, ball_speed_y, ball_speed_x
-        return np.asarray([self.paddle.pos[1], self.ball.pos[0], self.ball.pos[1], self.ball_v[0], self.ball_v[1]])
+        # return np.asarray([self.paddle.pos[1], self.ball.pos[0], self.ball.pos[1], self.ball_v[0], self.ball_v[1]])
+
+        # paddle_x, ball_y, ball_x
+        return (self.paddle.pos[1]//2, self.ball.pos[0]//2, self.ball.pos[1]//2)
 
     def encode_pixels(self):
         obs = np.copy(obs_base)

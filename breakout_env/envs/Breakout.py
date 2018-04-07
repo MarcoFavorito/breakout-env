@@ -33,6 +33,7 @@ class Breakout(gym.Env):
 
   def reset(self):
     self.state = BreakoutState(self.conf)
+    self.state.started = True
     return self.state
 
   def step(self, action):
